@@ -12,10 +12,11 @@ def user_login(request):
             cd = form.cleaned_data
 
             user = authenticate(request, username=cd['username'], password=cd['password'])
-            login(request, user)
-            return redirect('account:home')
-        else:
-            return HttpResponse('Invalid username or password. Please try again later')
+            if user is not None:
+                login(request, user)
+                return redirect('account:home')
+            else:
+                return HttpResponse('Invalid username or password. Please try again later.')
     else:
         form = LoginForm()
     return render(request, 'account/login.html', {
