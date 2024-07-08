@@ -4,6 +4,7 @@ from rest_framework.response import Response  # Class to create response objects
 from django.conf import settings
 from .models import Item
 from .serializers import ItemSerializer
+from rest_framework import status
 
 
 @api_view(['GET'])
@@ -20,6 +21,39 @@ def get_items(request):
     items = Item.objects.all()
     serializer = ItemSerializer(items, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+def post_items(request):
+    serializer = ItemSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)
+
+
+@api_view(['PATCH'])
+def patch_item(request, item_id):
+    try:
+        item = Item.objects.get(pk=item_id)
+    except Item.DoesNotExist:
+        return Response({'error': 'Item not found.'}, status=status.HTTP_404_NOT_FOUND)
+    serializer = ItemSerializer(item, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+def delete_items(request, item_id):
+    try:
+        item = Item.objects.get(pk=item_id)
+        item.delete()
+        return Response({'message': 'Item deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+    except Item.DoesNotExist:
+        return Response({'error': 'Item not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
