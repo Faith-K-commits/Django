@@ -2,6 +2,24 @@ import requests  # Library for making HTTP requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response  # Class to create response objects for API views
 from django.conf import settings
+from .models import Item
+from .serializers import ItemSerializer
+
+
+@api_view(['GET'])
+def test(request):
+    data = {
+        'name': 'Test API',
+        'message': 'This is my first API endpoint'
+    }
+    return Response(data)
+
+
+@api_view(['GET'])
+def get_items(request):
+    items = Item.objects.all()
+    serializer = ItemSerializer(items, many=True)
+    return Response(serializer.data)
 
 
 @api_view(['GET'])
